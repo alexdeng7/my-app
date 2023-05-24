@@ -5,6 +5,8 @@ const Counter = ({ defaultValue }) => {
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
   const [activeSection, setActiveSection] = useState(null);
+  const [postTitle, setPostTitle] = useState("");
+  const [postBody, setPostBody] = useState("");
 
   useEffect(() => {
     if (count > 9 || count < -9) {
@@ -46,11 +48,30 @@ const Counter = ({ defaultValue }) => {
       });
   };
 
+  const postInfo = () => {
+    const newPost = {
+      title: postTitle,
+      body: postBody,
+    };
+
+    fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      body: JSON.stringify(newPost),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    })
+      .then((response) => response.json())
+      .then((json) => console.log(json));
+  };
+
   const clearPage = () => {
     setCount(defaultValue);
     setPosts([]);
     setUsers([]);
     setActiveSection(null);
+    setPostTitle("");
+    setPostBody("");
   };
 
   return (
@@ -81,6 +102,29 @@ const Counter = ({ defaultValue }) => {
       <div className="p-4 mt-4 border border-orange-400 rounded-lg bg-amber-200 w-72">
         <button className="text-3xl text-rose-300" onClick={getUsers}>
           Get Users
+        </button>
+      </div>
+      <div className="p-4 mt-4 border border-orange-400 rounded-lg bg-amber-200 w-80">
+        <input
+          className="w-full px-3 py-2 text-2xl text-gray-700 border border-gray-300 rounded-lg"
+          type="text"
+          placeholder="Title:"
+          value={postTitle}
+          onChange={(e) => setPostTitle(e.target.value)}
+        />
+      </div>
+      <div className="p-4 mt-4 border border-orange-400 rounded-lg bg-amber-200 w-80">
+        <input
+          className="w-full px-3 py-2 text-2xl text-gray-700 border border-gray-300 rounded-lg"
+          type="text"
+          placeholder="Body:"
+          value={postBody}
+          onChange={(e) => setPostBody(e.target.value)}
+        />
+      </div>
+      <div className="w-64 p-4 mt-4 border border-orange-400 rounded-lg bg-amber-200">
+        <button className="text-3xl text-rose-300" onClick={postInfo}>
+          Post It!
         </button>
       </div>
       {activeSection === "posts" && (
