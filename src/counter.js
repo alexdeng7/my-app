@@ -7,6 +7,8 @@ const Counter = ({ defaultValue }) => {
   const [activeSection, setActiveSection] = useState(null);
   const [postTitle, setPostTitle] = useState("");
   const [postBody, setPostBody] = useState("");
+  const [queryValue, setQueryValue] = useState("");
+  const [queryResults, setQueryResults] = useState([]);
 
   useEffect(() => {
     if (count > 9 || count < -9) {
@@ -53,7 +55,6 @@ const Counter = ({ defaultValue }) => {
       title: postTitle,
       body: postBody,
     };
-
     fetch("https://jsonplaceholder.typicode.com/posts", {
       method: "POST",
       body: JSON.stringify(newPost),
@@ -65,6 +66,32 @@ const Counter = ({ defaultValue }) => {
       .then((json) => console.log(json));
   };
 
+  const getQueryResults = () => {
+    if (queryValue.trim() !== "") {
+      fetch(
+        "https://cuy99fet4b.execute-api.us-east-2.amazonaws.com/Dev/sneakers?" +
+          new URLSearchParams({
+            itemId: queryValue.toUpperCase(),
+          })
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          setQueryResults(data);
+          setActiveSection("query");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      getQueryResults();
+    }
+  };
+
   const clearPage = () => {
     setCount(defaultValue);
     setPosts([]);
@@ -72,6 +99,8 @@ const Counter = ({ defaultValue }) => {
     setActiveSection(null);
     setPostTitle("");
     setPostBody("");
+    setQueryValue("");
+    setQueryResults([]);
   };
 
   return (
@@ -127,6 +156,21 @@ const Counter = ({ defaultValue }) => {
           Post It!
         </button>
       </div>
+      <div className="p-4 mt-4 border border-orange-400 rounded-lg bg-amber-200 w-80">
+        <input
+          className="w-full px-3 py-2 text-2xl text-gray-700 border border-gray-300 rounded-lg"
+          type="text"
+          placeholder="Search Sneaker Brand:"
+          value={queryValue}
+          onChange={(e) => setQueryValue(e.target.value)}
+          onKeyDown={handleKeyPress}
+        />
+      </div>
+      <div className="w-64 p-4 mt-4 border border-orange-400 rounded-lg bg-amber-200">
+        <button className="text-3xl text-rose-300" onClick={getQueryResults}>
+          Query
+        </button>
+      </div>
       {activeSection === "posts" && (
         <div id="output" className="mt-8">
           {posts.map((post) => (
@@ -157,6 +201,23 @@ const Counter = ({ defaultValue }) => {
               </ul>
             </div>
           ))}
+        </div>
+      )}
+      {activeSection === "query" && (
+        <div id="output" className="mt-8">
+          {queryResults.length === 0 ? (
+            <p className="text-2xl text-red-500">No Shoes Under This Brand</p>
+          ) : (
+            queryResults.map((result, index) => (
+              <div
+                key={index}
+                className="p-6 mb-6 text-black bg-white rounded-lg shadow-lg"
+              >
+                <h3 className="text-2xl font-bold uppercase">{result.Brand}</h3>
+                <p className="mt-4 text-lg font-light">{result.Model}</p>
+              </div>
+            ))
+          )}
         </div>
       )}
       <div className="mt-8">
